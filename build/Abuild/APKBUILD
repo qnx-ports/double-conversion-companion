@@ -1,0 +1,42 @@
+# Maintainer: Marian Buschsieweke <marian.buschsieweke@posteo.net>
+# QNX Maintainer: Felix Xing <fxing@qnx.com>
+pkgname=double-conversion
+pkgver=3.3.1
+pkgrel=0
+pkgdesc="Binary-decimal and decimal-binary routines for IEEE doubles"
+url="https://github.com/google/double-conversion"
+arch="all"
+license="BSD-3-Clause"
+depends="libc++"
+makedepends="cmake ninja clang libc++-dev"
+subpackages="$pkgname-dev"
+source="$pkgname-$pkgver.tar.gz::https://github.com/google/double-conversion/archive/v$pkgver.tar.gz"
+
+build() {
+    # C++ packages prefer clang over gcc due to compiler issues
+    CC=clang \
+    CXX=clang++ \
+    CFLAGS="$CFLAGS -O2" \
+    CXXFLAGS="$CXXFLAGS -O2" \
+    cmake -B build -G Ninja \
+        -DBUILD_TESTING=ON \
+        -DCMAKE_BUILD_TYPE=None \
+        -DCMAKE_INSTALL_PREFIX=/usr \
+        -DCMAKE_INSTALL_LIBDIR=lib \
+        -DBUILD_SHARED_LIBS=ON \
+        -DCMAKE_POLICY_VERSION_MINIMUM=3.5
+    cmake --build build
+}
+
+check() {
+    cd build
+    ctest
+}
+
+package() {
+    DESTDIR="$pkgdir" cmake --install build
+}
+
+sha512sums="
+60cab2fe623204cfa8737150e6ffcae091266180461dba377231e4fe8dccf712e74c643cd317b62266240ab82f1c0f820cf825038d627934d2dd0af1426f0cca  double-conversion-3.3.1.tar.gz
+"
